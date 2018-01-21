@@ -16,7 +16,6 @@
 #include <avr/io.h>
 #include <stdlib.h>
 #include "uart/uart.h"
-#include "global.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>

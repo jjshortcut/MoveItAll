@@ -5,7 +5,6 @@
 #include <avr/io.h>
 #include "defines.h"
 #include "uart_handler.h"
-#include "LSM303_simple.h"
 #include <util/atomic.h>
 #include <string.h>
 #include <avr/interrupt.h>
