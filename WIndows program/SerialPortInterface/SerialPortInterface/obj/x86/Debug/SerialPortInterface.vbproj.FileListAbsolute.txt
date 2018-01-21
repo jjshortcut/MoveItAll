@@ -1,0 +1,23 @@
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\bin\Debug\SerialPortInterface.exe
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\bin\Debug\SerialPortInterface.pdb
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\bin\Debug\SerialPortInterface.xml
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.frmMain.resources
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.Resources.resources
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\GenerateResource.read.1.tlog
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\GenerateResource.write.1.tlog
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.exe
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.xml
+D:\My Documents\Visual Studio 2010\Projects\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.pdb
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.exe
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.xml
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.pdb
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\bin\Debug\SerialPortInterface.exe
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\bin\Debug\SerialPortInterface.pdb
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\bin\Debug\SerialPortInterface.xml
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.frmMain.resources
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.Resources.resources
+D:\DOWNLOAD\SerialPortInterface\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.vbproj.GenerateResource.Cache
+D:\Dropbox\3. Jordy en JJ\Projects JJ\Blind_controller\Windows program\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.exe
+D:\Dropbox\3. Jordy en JJ\Projects JJ\Blind_controller\Windows program\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.xml
+D:\Dropbox\3. Jordy en JJ\Projects JJ\Blind_controller\Windows program\SerialPortInterface\SerialPortInterface\obj\x86\Debug\SerialPortInterface.pdb
