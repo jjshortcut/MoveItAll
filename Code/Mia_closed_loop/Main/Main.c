@@ -7,9 +7,9 @@
 
 /*
 TODO:
-- Stop/Start command uart
+- Stop/Reset command uart S/R
 - Check P controller
--
+- P+1 implementation
 */
 
 //#include "global.h"
