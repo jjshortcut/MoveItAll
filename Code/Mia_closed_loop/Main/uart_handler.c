@@ -115,7 +115,7 @@ void get_serial(void)
 	)
 	{
 		command_in[data_count] = c;
-		if (command_in[data_count] == '\n')
+		if ((command_in[data_count] == '\n') || (command_in[data_count] == '\r'))
 		{
 			uart_puts("Received =<");
 			for(uint8_t i=0; i<data_count; i++) {
@@ -155,7 +155,7 @@ void process_command()
 	uint16_t val = 0;
 	switch (command_in[0]) {
 			
-		case 'S':	/* duty cycle */
+		case 'V':	/* duty cycle */
 		if (command_in[1] == '=') {
 			val = read_int_value();}
 
@@ -183,20 +183,68 @@ void process_command()
 		break;
 		
 		case 'P':	/* Setpoint Angle */
-		if (command_in[1] == '=') {
-		val = read_int_value();}
+		if (command_in[1] == '=') 
+		{
+			val = read_int_value();
+			if (val>=0 && val<=255)
+			{
+				device.setpoint_angle = val;
+				uart_puts("Setpoint = ");
+				print_int(val, TRUE);
+			}
+			else
+			{
+				uart_puts("Setpoint not in range 0-255\n");
+			}
+		}
 
-		if (val>=0 && val<=255)
-		{
-			device.setpoint_angle = val;
-			uart_puts("Setpoint = ");
-			print_int(val, TRUE);
-		}
-		else
-		{
-			uart_puts("Setpoint not in range 0-255\n");
-		}
 		break;
+		
+		case '+':	/* Setpoint Angle + */
+			if (command_in[1] == '=')
+			{
+				val = read_int_value();
+				if (val>0 && val<=MAX_DEGREES)
+				{
+					device.setpoint_angle += val;
+					device.setpoint_angle = (device.setpoint_angle >= MAX_DEGREES) ? MAX_DEGREES : device.setpoint_angle;
+					uart_puts("Setpoint = ");
+					print_int(device.setpoint_angle, TRUE);
+				}
+				else
+				{
+					uart_puts("Setpoint not in range too big\n");
+				}
+			}
+		break;
+		
+		case '-':	/* Setpoint Angle - */
+			if (command_in[1] == '=')
+			{
+				val = read_int_value();
+				if (device.setpoint_angle >= val)
+				{
+					device.setpoint_angle -= val;
+					uart_puts("Setpoint = ");
+					print_int(device.setpoint_angle, TRUE);
+				}
+				else
+				{
+					uart_puts("Setpoint not in range, too small\n");
+				}
+			}
+		break;
+		
+		case 'R':	/* Reset */
+			device.movementEnabled = TRUE;
+			uart_puts("Reset");
+		break;
+		
+		case 'S':	/* STOP */
+			device.movementEnabled = FALSE;
+			uart_puts("STOP!");
+		break;
+		
 					
 		default:
 		uart_puts("No valid command:");

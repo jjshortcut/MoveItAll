@@ -34,7 +34,7 @@ uint16_t print_counter = 0;
 
 ISR (TIMER1_COMPA_vect)  // timer1 compA
 {
-	LED_TOGGLE;	// alive LED
+	//LED_TOGGLE;	// alive LED
 	
 	device.current = read_adc(SENSE_A_PIN);	// current measurement of motor
 	device.current_angle = ((read_adc(ANGLE_PIN)-MIN_ANGLE) / ((MAX_ANGLE-MIN_ANGLE)/MAX_DEGREES));	//
@@ -58,18 +58,18 @@ int main(void)
 	
 	uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) );	/* Init Uart */
 	sei();						/* Enable global interrupts for uart*/
-	uart_puts("\n\rInit Uart OK\n");
+	//uart_puts("\n\rInit Uart OK\n");
 	
-	device.current_limit = 500;	// set current limit
-	device.movementEnabled = TRUE;
+	device.current_limit = DEFAULT_CURRENT_LIMIT;	// set current limit
+	device.movementEnabled = FALSE;
 
 	/* Now the device is ready! */
-	uart_puts("MoveItAll hand ready!");		/* Print version number	*/
-	print_float(VERSION,1);
+	//uart_puts("MoveItAll hand ready!");		/* Print version number	*/
+	//print_float(VERSION,1);
 	
-	set_motor_dir(FALSE);
-	set_motor_speed(127);//50%
-	device.setpoint_angle = 250;
+	//set_motor_dir(FALSE);
+	//set_motor_speed(127);//50%
+	device.setpoint_angle = 50;
 	
 	while(1)
 	{	
@@ -84,7 +84,8 @@ int main(void)
 		
 		if (print_counter == REFRESH_LOOP_MS)
 		{
-			print_values();
+			//print_values();
+			print_HMI();
 			print_counter = 0;
 		}
 		print_counter++;	
@@ -199,6 +200,39 @@ void print_values(void)
 	
 }
 
+void print_HMI(void)
+{
+	uart_puts("n0.val=");
+	print_int(device.current_angle, FALSE);
+	uart_puts("ÿÿÿ");
+	
+	uart_puts("n1.val=");
+	print_int(device.setpoint_angle, FALSE);
+	uart_puts("ÿÿÿ");
+	
+	if (device.status==WORKING)
+	{
+		uart_puts("t3.txt=\"WORKING\"");
+		uart_puts("ÿÿÿ");
+	}
+	else if (device.status==DONE)
+	{
+		uart_puts("t3.txt=\"DONE\"");
+		uart_puts("ÿÿÿ");
+	}
+	
+	if (device.status==STOP)
+	{
+		uart_puts("t3.txt=\"STOP\"");
+		uart_puts("ÿÿÿ");
+	}
+	
+	uart_puts("n2.val=");
+	print_int(device.current, FALSE);
+	uart_puts("ÿÿÿ");	
+	//g0.txt="Hello"ÿÿÿ
+}
+
 void set_motor_dir(uint8_t dir)
 {
 	if (dir == FORWARD)
@@ -225,7 +259,7 @@ uint16_t calculate_error(void)
 {
 	return 0;
 }
-
+/*
 void p_loop(void)
 {
 	uint16_t speed = 0;
@@ -280,7 +314,88 @@ void p_loop(void)
 		timeout_counter++;
 	}
 }
+*/
 
+void p_loop(void)
+{
+	uint16_t speed = 0;
+	static uint16_t error_old = 0;
+	static uint16_t timer = 0;
+	static uint8_t init_move = FALSE;
+	
+	if (device.current>=device.current_limit)
+	{
+		set_motor_speed(0);	// Turn motor off
+		// TODO set brake pin
+		device.movementEnabled = FALSE;
+		device.status = STOP;
+	}
+	
+	if (device.movementEnabled == TRUE)
+	{
+		if ((device.current_angle + MIN_ACT_ON_ERROR) <= device.setpoint_angle)	// setpoint is further, pull
+		{
+			device.error = (device.setpoint_angle - device.current_angle);	// Calc error
+			set_motor_dir(FORWARD);
+			speed = (P_GAIN * device.error);								// calculate output pwm value
+			speed = (speed > 255) ? 255 : speed;							// limit output
+			//set_motor_speed(speed);	// do output
+			set_motor_speed(255);	// do output
+			device.status = WORKING;
+		}
+		else if ((device.current_angle > MIN_ACT_ON_ERROR) && ((device.current_angle - MIN_ACT_ON_ERROR) >= device.setpoint_angle))  // past the setpoint, release
+		{
+			device.error = (device.current_angle - device.setpoint_angle); // Calc error
+			set_motor_dir(BACKWARD);
+			
+			if (!init_move)	// do release a bit first
+			{
+				set_motor_speed(255);
+				init_move = TRUE;
+				//uart_puts("INITSPEED\n");
+			}
+			else
+			{
+				if (timer == (FUNCTION_TIMER_MS/INTERRUPT_MS))
+				{
+					LED_TOGGLE;	// every 200ms?
+					if (device.error < error_old)	// if moved a bit
+					{
+						speed = (P_GAIN * device.error);								// calculate output pwm value
+						speed = (speed > 255) ? 255 : speed;							// limit output
+						//set_motor_speed(speed);
+						set_motor_speed(255);	// do output
+						//uart_puts("ON\n");
+					}
+					else
+					{
+						set_motor_speed(0);	// wait for the user to release a bit
+						//uart_puts("OFF\n");
+					}
+					
+					error_old = device.error;
+					timer = 0;
+					device.status = WORKING;
+				}
+				else
+				{
+					timer++;
+				}
+			}
+		}
+		else
+		{
+			set_motor_speed(0);	// at position
+			init_move = TRUE;
+			device.status = DONE;
+		}
+	}
+	else
+	{
+		set_motor_speed(0);
+		device.status = STOP;
+	}	
+}
 
 
 

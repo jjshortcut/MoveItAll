@@ -22,11 +22,18 @@
 #define MAX_ANGLE 665
 #define MAX_DEGREES 105
 
+#define DEFAULT_CURRENT_LIMIT 300
+
+#define DONE 0
+#define WORKING 1
+#define STOP 2
+
 
 /* P loop variables */
-#define P_GAIN				1	// P loop gain
-#define MIN_ACT_ON_ERROR	5	// Max error value to act on, otherwise stop
-#define TIMEOUT_MS			500 	// Stop motor after no response
+#define P_GAIN				6	// P loop gain
+#define MIN_ACT_ON_ERROR	2	// Max error value to act on, otherwise stop
+#define TIMEOUT_MS			500 // Stop motor after no response
+#define FUNCTION_TIMER_MS	20	//20=150ms
 
 #define INTERRUPT_MS 10	// check max also!
 #define REFRESH_LOOP_MS 500	/* delay in main loop */ 
@@ -61,6 +68,7 @@ void set_motor_dir(uint8_t dir);
 void set_motor_speed(uint8_t speed);
 
 void print_values(void);	// debug info
+void print_HMI(void);		// HMI update
 
 #define FORWARD 0
 #define BACKWARD 1
