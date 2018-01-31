@@ -63,6 +63,7 @@ int main(void)
 
 	device.current_limit = DEFAULT_CURRENT_LIMIT;	// set current limit
 	device.movementEnabled = FALSE;
+	device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
 
 	/* Now the device is ready! */
 	//uart_puts("MoveItAll hand ready!");		/* Print version number	*/
@@ -83,19 +84,18 @@ int main(void)
 			//check_auto_movement();	// Check if it has to do auto movement
 			p_loop();	// 	do p loop stuff
 			
-			print_values();
+			
 			check_movement = FALSE;
 		}
 		
-		
-		
-		//if (print_counter == REFRESH_LOOP_MS)
+		if (print_counter == REFRESH_LOOP_MS)
 		{
 			//print_values();
-			//print_HMI();
-			//print_counter = 0;
+			print_HMI();
+			print_counter = 0;
 		}
-		print_counter++;	
+		else {print_counter++;}
+			
 		
 	}
 }
@@ -207,9 +207,13 @@ void print_values(void)
 	}
 	
 	uart_puts(" STAT=");
-	if (device.status == WORKING)
+	if (device.status == WORKING_UP)
 	{
-		uart_puts("WORKING\n");
+		uart_puts("WORKING UP\n");
+	}
+	else if (device.status == WORKING_DOWN)
+	{
+		uart_puts("WORKING DOWN\n");
 	}
 	else if (device.status == DONE)
 	{
@@ -232,26 +236,31 @@ void print_HMI(void)
 	print_int(device.setpoint_angle, FALSE);
 	uart_puts("ÿÿÿ");
 	
-	if (device.status==WORKING)
+	if (device.status==WORKING_UP)
 	{
-		uart_puts("t3.txt=\"WORKING\"");
+		uart_puts("t3.txt=\"TREK..\"");
 		uart_puts("ÿÿÿ");
 	}
+	else if (device.status==WORKING_DOWN)
+	{
+		uart_puts("t3.txt=\"ONTSPAN..\"");
+		uart_puts("ÿÿÿ");
+	}	
 	else if (device.status==DONE)
 	{
-		uart_puts("t3.txt=\"DONE\"");
+		uart_puts("t3.txt=\"KLAAR\"");
 		uart_puts("ÿÿÿ");
 	}
 	
 	if (device.status==STOP)
 	{
-		uart_puts("t3.txt=\"STOP\"");
+		uart_puts("t3.txt=\"STOP, RESET\"");
 		uart_puts("ÿÿÿ");
 	}
 	
-	uart_puts("n2.val=");
-	print_int(device.current, FALSE);
-	uart_puts("ÿÿÿ");	
+	//uart_puts("n2.val=");
+	//print_int(device.current, FALSE);
+	//uart_puts("ÿÿÿ");	
 	//g0.txt="Hello"ÿÿÿ
 }
 
@@ -368,7 +377,7 @@ void p_loop(void)
 	
 	if (device.movementEnabled == TRUE)
 	{
-		if ((device.current_angle + MIN_ACT_ON_ERROR) <= device.setpoint_angle)	// setpoint is further, pull
+		if ((device.current_angle + device.min_act_on_error) <= device.setpoint_angle)	// setpoint is further, pull
 		{
 			device.error = (device.setpoint_angle - device.current_angle);	// Calc error
 			set_motor_dir(FORWARD);
@@ -376,9 +385,9 @@ void p_loop(void)
 			speed = (speed > 255) ? 255 : speed;							// limit output
 			//set_motor_speed(speed);	// do output
 			set_motor_speed(255);	// do output
-			device.status = WORKING;
+			device.status = WORKING_UP;
 		}
-		else if ((device.current_angle > MIN_ACT_ON_ERROR) && ((device.current_angle - MIN_ACT_ON_ERROR) >= device.setpoint_angle))  // past the setpoint, release
+		else if ((device.current_angle > device.min_act_on_error) && ((device.current_angle - device.min_act_on_error) >= device.setpoint_angle))  // past the setpoint, release
 		{
 			device.error = (device.current_angle - device.setpoint_angle); // Calc error
 			set_motor_dir(BACKWARD);
@@ -417,11 +426,12 @@ void p_loop(void)
 					timer++;
 				}
 			//}
-			device.status = WORKING;
+			device.status = WORKING_DOWN;
 		}
 		else
 		{
 			set_motor_speed(0);	// at position
+			device.min_act_on_error = MIN_ACT_ON_ERROR_EXTENDED;
 			//init_move = TRUE;
 			device.status = DONE;
 		}

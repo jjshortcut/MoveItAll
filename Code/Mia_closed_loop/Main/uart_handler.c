@@ -185,16 +185,20 @@ void process_command()
 		case 'P':	/* Setpoint Angle */
 		if (command_in[1] == '=') 
 		{
-			val = read_int_value();
-			if (val>=0 && val<=255)
+			if (!device.multiply_movement)
 			{
-				device.setpoint_angle = val;
-				uart_puts("Setpoint = ");
-				print_int(val, TRUE);
-			}
-			else
-			{
-				uart_puts("Setpoint not in range 0-255\n");
+				val = read_int_value();
+				if (val>=0 && val<=255)
+				{
+					device.setpoint_angle = val;
+					device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+					uart_puts("Setpoint = ");
+					print_int(val, TRUE);
+				}
+				else
+				{
+					uart_puts("Setpoint not in range 0-255\n");
+				}
 			}
 		}
 
@@ -203,17 +207,21 @@ void process_command()
 		case '+':	/* Setpoint Angle + */
 			if (command_in[1] == '=')
 			{
-				val = read_int_value();
-				if (val>0 && val<=MAX_DEGREES)
+				if (!device.multiply_movement)
 				{
-					device.setpoint_angle += val;
-					device.setpoint_angle = (device.setpoint_angle >= MAX_DEGREES) ? MAX_DEGREES : device.setpoint_angle;
-					uart_puts("Setpoint = ");
-					print_int(device.setpoint_angle, TRUE);
-				}
-				else
-				{
-					uart_puts("Setpoint not in range too big\n");
+					val = read_int_value();
+					if (val>0 && val<=MAX_DEGREES)
+					{
+						device.setpoint_angle += val;
+						device.setpoint_angle = (device.setpoint_angle >= MAX_DEGREES) ? MAX_DEGREES : device.setpoint_angle;
+						device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+						uart_puts("Setpoint = ");
+						print_int(device.setpoint_angle, TRUE);
+					}
+					else
+					{
+						uart_puts("Setpoint not in range too big\n");
+					}
 				}
 			}
 		break;
@@ -221,22 +229,28 @@ void process_command()
 		case '-':	/* Setpoint Angle - */
 			if (command_in[1] == '=')
 			{
-				val = read_int_value();
-				if (device.setpoint_angle >= val)
+				if (!device.multiply_movement)
 				{
-					device.setpoint_angle -= val;
-					uart_puts("Setpoint = ");
-					print_int(device.setpoint_angle, TRUE);
-				}
-				else
-				{
-					uart_puts("Setpoint not in range, too small\n");
+					val = read_int_value();
+					if (device.setpoint_angle >= val)
+					{
+						device.setpoint_angle -= val;
+						device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+						uart_puts("Setpoint = ");
+						print_int(device.setpoint_angle, TRUE);
+					}
+					else
+					{
+						uart_puts("Setpoint not in range, too small\n");
+					}
 				}
 			}
 		break;
 		
 		case 'R':	/* Reset */
 			device.movementEnabled = TRUE;
+			device.multiply_movement = 0;
+			device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
 			uart_puts("Reset");
 		break;
 		
@@ -253,6 +267,7 @@ void process_command()
 			{
 				device.setpoint_angle_previous = device.setpoint_angle;	// save current setpoint
 				device.multiply_movement = val;
+				device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
 				uart_puts("Doing auto movement\n");
 			}
 			else

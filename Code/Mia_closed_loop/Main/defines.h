@@ -25,13 +25,15 @@
 #define DEFAULT_CURRENT_LIMIT 350
 
 #define DONE 0
-#define WORKING 1
-#define STOP 2
+#define WORKING_UP 1
+#define WORKING_DOWN 2
+#define STOP 3
 
 
 /* P loop variables */
 #define P_GAIN				6	// P loop gain
-#define MIN_ACT_ON_ERROR	2	// Max error value to act on, otherwise stop
+#define MIN_ACT_ON_ERROR_DEFAULT	3	// Max error value to act on, otherwise stop
+#define MIN_ACT_ON_ERROR_EXTENDED 8	// when in Idle/done mode
 #define TIMEOUT_MS			500 // Stop motor after no response
 #define FUNCTION_TIMER_MS	20	//20=150ms
 
@@ -49,6 +51,7 @@ struct database {
 	uint8_t setpoint_angle;
 	uint8_t setpoint_angle_previous;
 	uint16_t current_angle;
+	uint8_t min_act_on_error;
 	uint16_t error;
 	uint16_t current;
 	uint16_t current_limit;
