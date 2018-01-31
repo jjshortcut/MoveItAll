@@ -59,7 +59,8 @@ int main(void)
 	uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) );	/* Init Uart */
 	sei();						/* Enable global interrupts for uart*/
 	//uart_puts("\n\rInit Uart OK\n");
-	
+	uart_puts("ÿÿÿrestÿÿÿ");	// reset HMI
+
 	device.current_limit = DEFAULT_CURRENT_LIMIT;	// set current limit
 	device.movementEnabled = FALSE;
 
@@ -116,10 +117,11 @@ void init_int(void)
 {
 	//OCRn =  [ (clock_speed / Prescaler_value) * Desired_time_in_Seconds ] - 1
 	
+	/* PWM control directtly from timer, fast pwm, not used due to only using on/off control */
 	// Init motor timer2, output pin is PD3, OC2B
-	TCCR2A |= (1<<COM2B1);	// None-inverted mode (HIGH at bottom, LOW on Match)
-	TCCR2A |= (1 << WGM21) | (1 << WGM20);	// set fast PWM Mode
-	TCCR2B |= (1 << CS21);	// set prescaler to 8 and starts PWM
+	//TCCR2A |= (1<<COM2B1);	// None-inverted mode (HIGH at bottom, LOW on Match)
+	//TCCR2A |= (1 << WGM21) | (1 << WGM20);	// set fast PWM Mode
+	//TCCR2B |= (1 << CS21);	// set prescaler to 8 and starts PWM
 	//OCR2B = 127;	//50%duty
 	
 	/*
@@ -193,11 +195,25 @@ void print_values(void)
 	uart_puts(" Dir=");
 	if (device.direction == FORWARD)
 	{
-		uart_puts("PULL\n");		
+		uart_puts("PULL");		
 	}
 	else
 	{
-		uart_puts("RELEASE\n");	
+		uart_puts("RELEASE");	
+	}
+	
+	uart_puts(" STAT=");
+	if (device.status == WORKING)
+	{
+		uart_puts("WORKING\n");
+	}
+	else if (device.status == DONE)
+	{
+		uart_puts("DONE\n");
+	}
+	else if (device.status == STOP)
+	{
+		uart_puts("STOP\n");
 	}
 	
 }
@@ -252,8 +268,19 @@ void set_motor_speed(uint8_t speed)
 {
 	if (speed>=0 && speed<=255)
 	{
-		OCR2B = speed;	// set pwm duty cycle
-		device.speed = speed;
+		if (speed==255)
+		{
+			PWM_A_ON;
+		}
+		else if (speed==0)
+		{
+			PWM_A_OFF;
+		}
+		else
+		{
+			OCR2B = speed;	// set pwm duty cycle
+			device.speed = speed;
+		}
 	}
 }
 

@@ -22,7 +22,7 @@
 #define MAX_ANGLE 665
 #define MAX_DEGREES 105
 
-#define DEFAULT_CURRENT_LIMIT 500
+#define DEFAULT_CURRENT_LIMIT 200
 
 #define DONE 0
 #define WORKING 1
