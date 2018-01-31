@@ -1,18 +1,15 @@
 /*
 *	Main.c
 *	MoveItAll project
-*	Author: J-J_LAPTOP
+*	Author: Jan-Jaap Schuurman @ ProtoSpace 2018
 *	Version: 0.1
 */
 
 /*
 TODO:
-- Stop/Reset command uart S/R
-- Check P controller
-- P+1 implementation
+-
 */
 
-//#include "global.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
@@ -20,8 +17,6 @@ TODO:
 #include <stdlib.h>
 #include <stdio.h>
 #include "defines.h"
-//#include <avr/eeprom.h>
-//#include "uart/uart.h"
 #include "uart_handler.h"
 
 // Prototypes
@@ -372,9 +367,7 @@ void p_loop(void)
 		device.movementEnabled = FALSE;
 		device.status = STOP;
 	}
-	
-	
-	
+
 	if (device.movementEnabled == TRUE)
 	{
 		if ((device.current_angle + device.min_act_on_error) <= device.setpoint_angle)	// setpoint is further, pull
@@ -454,6 +447,8 @@ void check_auto_movement(void)
 	{
 		if (device.status == DONE)
 		{
+			device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+			
 			if (move_up)
 			{
 				device.setpoint_angle = device.setpoint_angle_previous;

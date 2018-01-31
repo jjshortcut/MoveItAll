@@ -185,7 +185,7 @@ void process_command()
 		case 'P':	/* Setpoint Angle */
 		if (command_in[1] == '=') 
 		{
-			if (!device.multiply_movement)
+			if ((!device.multiply_movement) && (device.status==DONE))
 			{
 				val = read_int_value();
 				if (val>=0 && val<=255)
@@ -207,7 +207,7 @@ void process_command()
 		case '+':	/* Setpoint Angle + */
 			if (command_in[1] == '=')
 			{
-				if (!device.multiply_movement)
+				if ((!device.multiply_movement) && (device.status==DONE))
 				{
 					val = read_int_value();
 					if (val>0 && val<=MAX_DEGREES)
@@ -229,7 +229,7 @@ void process_command()
 		case '-':	/* Setpoint Angle - */
 			if (command_in[1] == '=')
 			{
-				if (!device.multiply_movement)
+				if ((!device.multiply_movement) && (device.status==DONE))
 				{
 					val = read_int_value();
 					if (device.setpoint_angle >= val)
