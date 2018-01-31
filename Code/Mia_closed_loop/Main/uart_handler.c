@@ -260,6 +260,7 @@ void process_command()
 				uart_puts("Multiply movement not in range\n");
 			}
 		}
+		break;
 		
 					
 		default:

@@ -75,21 +75,25 @@ int main(void)
 	while(1)
 	{	
 		get_serial();
-		if (command_ready) {process_command();}
+		//if (command_ready) {process_command();}
 		
 		if (check_movement)
 		{
+			if (command_ready) {process_command();}
+			//check_auto_movement();	// Check if it has to do auto movement
 			p_loop();	// 	do p loop stuff
+			
+			print_values();
 			check_movement = FALSE;
 		}
 		
-		check_auto_movement();	// Check if it has to do auto movement
 		
-		if (print_counter == REFRESH_LOOP_MS)
+		
+		//if (print_counter == REFRESH_LOOP_MS)
 		{
-			print_values();
+			//print_values();
 			//print_HMI();
-			print_counter = 0;
+			//print_counter = 0;
 		}
 		print_counter++;	
 		
@@ -350,7 +354,7 @@ void p_loop(void)
 	uint16_t speed = 0;
 	static uint16_t error_old = 0;
 	static uint16_t timer = 0;
-	static uint8_t init_move = FALSE;
+	//static uint8_t init_move = FALSE;
 	
 	if (device.current>=device.current_limit)
 	{
@@ -359,6 +363,8 @@ void p_loop(void)
 		device.movementEnabled = FALSE;
 		device.status = STOP;
 	}
+	
+	
 	
 	if (device.movementEnabled == TRUE)
 	{
@@ -377,14 +383,15 @@ void p_loop(void)
 			device.error = (device.current_angle - device.setpoint_angle); // Calc error
 			set_motor_dir(BACKWARD);
 			
-			if (!init_move)	// do release a bit first
+			/*if (!init_move)	// do release a bit first
 			{
 				set_motor_speed(255);
 				init_move = TRUE;
+				device.status = WORKING;
 				//uart_puts("INITSPEED\n");
 			}
 			else
-			{
+			{*/
 				if (timer == (FUNCTION_TIMER_MS/INTERRUPT_MS))
 				{
 					LED_TOGGLE;	// every 200ms?
@@ -404,26 +411,29 @@ void p_loop(void)
 					
 					error_old = device.error;
 					timer = 0;
-					device.status = WORKING;
 				}
 				else
 				{
 					timer++;
 				}
-			}
+			//}
+			device.status = WORKING;
 		}
 		else
 		{
 			set_motor_speed(0);	// at position
-			init_move = TRUE;
+			//init_move = TRUE;
 			device.status = DONE;
 		}
+		check_auto_movement();	// Check if it has to do auto movement
 	}
 	else
 	{
 		set_motor_speed(0);
 		device.status = STOP;
 	}	
+	
+	
 }
 
 void check_auto_movement(void)
@@ -438,7 +448,8 @@ void check_auto_movement(void)
 			{
 				device.setpoint_angle = device.setpoint_angle_previous;
 				move_up = FALSE;
-				uart_puts("Set to up\n");
+				uart_puts("Set to up:");
+				print_int(device.multiply_movement, TRUE);
 				device.multiply_movement--;
 			}
 			else
@@ -446,6 +457,11 @@ void check_auto_movement(void)
 				device.setpoint_angle = 0;
 				move_up = TRUE;
 				uart_puts("Set to down\n");
+			}
+			
+			if (!device.multiply_movement)
+			{
+				uart_puts("XXXXXXXXXXXX DONE!\n");
 			}
 		}	
 	}
