@@ -82,10 +82,12 @@ int main(void)
 			check_movement = FALSE;
 		}
 		
+		check_auto_movement();	// Check if it has to do auto movement
+		
 		if (print_counter == REFRESH_LOOP_MS)
 		{
-			//print_values();
-			print_HMI();
+			print_values();
+			//print_HMI();
 			print_counter = 0;
 		}
 		print_counter++;	
@@ -396,6 +398,32 @@ void p_loop(void)
 		device.status = STOP;
 	}	
 }
+
+void check_auto_movement(void)
+{
+	static uint8_t move_up = FALSE;	// begin to move to 0
+	
+	if (device.multiply_movement>0)
+	{
+		if (device.status == DONE)
+		{
+			if (move_up)
+			{
+				device.setpoint_angle = device.setpoint_angle_previous;
+				move_up = FALSE;
+				uart_puts("Set to up\n");
+				device.multiply_movement--;
+			}
+			else
+			{
+				device.setpoint_angle = 0;
+				move_up = TRUE;
+				uart_puts("Set to down\n");
+			}
+		}	
+	}
+}
+
 
 
 

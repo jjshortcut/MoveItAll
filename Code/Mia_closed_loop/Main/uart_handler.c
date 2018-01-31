@@ -245,6 +245,22 @@ void process_command()
 			uart_puts("STOP!");
 		break;
 		
+		case 'X':	/* Action for X times */
+		if (command_in[1] == '=')
+		{
+			val = read_int_value();
+			if (val>=0 && val<=100)
+			{
+				device.setpoint_angle_previous = device.setpoint_angle;	// save current setpoint
+				device.multiply_movement = val;
+				uart_puts("Doing auto movement\n");
+			}
+			else
+			{
+				uart_puts("Multiply movement not in range\n");
+			}
+		}
+		
 					
 		default:
 		uart_puts("No valid command:");

@@ -22,7 +22,7 @@
 #define MAX_ANGLE 665
 #define MAX_DEGREES 105
 
-#define DEFAULT_CURRENT_LIMIT 300
+#define DEFAULT_CURRENT_LIMIT 500
 
 #define DONE 0
 #define WORKING 1
@@ -47,11 +47,13 @@ struct database {
 	uint8_t direction;
 	uint8_t speed;
 	uint8_t setpoint_angle;
+	uint8_t setpoint_angle_previous;
 	uint16_t current_angle;
 	uint16_t error;
 	uint16_t current;
 	uint16_t current_limit;
 	volatile uint8_t movementEnabled;
+	uint8_t multiply_movement;
 	uint8_t status;
 };
 
@@ -69,6 +71,8 @@ void set_motor_speed(uint8_t speed);
 
 void print_values(void);	// debug info
 void print_HMI(void);		// HMI update
+
+void check_auto_movement(void);
 
 #define FORWARD 0
 #define BACKWARD 1
