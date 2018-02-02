@@ -1,8 +1,8 @@
 /*
 * defines.h
 *
-* Created: 2-4-16
-*  Author: J-J_LAPTOP
+* Created: 2-2-18
+*  Author: JJS
 */
 #ifndef DEFINES_H_
 #define DEFINES_H_
@@ -28,14 +28,14 @@
 #define WORKING_UP 1
 #define WORKING_DOWN 2
 #define STOP 3
-
+#define CURR_OVF 4
 
 /* P loop variables */
-#define P_GAIN				6	// P loop gain
+#define P_GAIN				6			// P loop gain
 #define MIN_ACT_ON_ERROR_DEFAULT	3	// Max error value to act on, otherwise stop
-#define MIN_ACT_ON_ERROR_EXTENDED 8	// when in Idle/done mode
-#define TIMEOUT_MS			500 // Stop motor after no response
-#define FUNCTION_TIMER_MS	20	//20=150ms
+#define MIN_ACT_ON_ERROR_EXTENDED 8		// when in Idle/done mode
+#define TIMEOUT_MS			500			// Stop motor after no response
+#define FUNCTION_TIMER_MS	20			//20=150ms
 
 #define INTERRUPT_MS 10	// check max also!
 #define REFRESH_LOOP_MS 500	/* delay in main loop */ 
@@ -153,49 +153,5 @@ void check_auto_movement(void);
 
 /* ANGLE PIN */
 #define ANGLE_PIN			PC3	//IN 3
-
-/* ON/OFF SWITCH */
-#define SW_PIN			PD7
-#define SW_PIN_REG		PIND
-#define SW_PIN_DDR		DDRD
-#define SW_PIN_PORT		PORTD
-#define SW_STATUS		(SW_PIN_REG & (1<<SW_PIN))
-
-/* BATTERY/ADC PIN */
-#define BATT_PIN		PC0	// ADC0
-#define BATT_PWR_PIN	PC1	// To turn on the Battery ADC measurement (LOW=ON)
-#define BATT_PWR_DDR	DDRC
-#define BATT_PWR_PORT	PORTC
-#define BATT_PWR_REG	PINC
-#define BATT_PWR_INIT	(BATT_PWR_DDR |= (1<<BATT_PWR_PIN))			// INIT pin
-#define BATT_PWR_OFF	(BATT_PWR_PORT = (1 << BATT_PWR_PIN))		// Reversed logic, on=gnd	
-#define BATT_PWR_ON 	(BATT_PWR_PORT &= ~(1 << BATT_PWR_PIN))		// Reversed logic, on=gnd	
-
-/* CHARGE STATUS PIN */
-#define CHARGING 1
-#define FULL 0
-#define CHARGE_ST_PIN		PC2
-#define CHARGE_ST_REG		PINC
-#define CHARGE_ST_DDR		DDRC
-#define CHARGE_ST_PORT		PORTC
-#define CHARGE_PIN_STATUS	(CHARGE_ST_REG & (1<<CHARGE_ST_PIN))
-
-/* POWER ON PIN */
-#define PWR_ON_PIN	PD6
-#define PWR_ON_DDR	DDRD
-#define PWR_ON_PORT	PORTD
-#define PWR_ON_REG	PIND
-#define PWR_ON_INIT	(PWR_ON_DDR |= (1<<PWR_ON_PIN))			
-#define PWR_ON		(PWR_ON_PORT = (1 << PWR_ON_PIN))		
-#define PWR_OFF		(PWR_ON_PORT &= ~(1 << PWR_ON_PIN))		
-
-#define AT_PIN		PD3
-#define AT_PIN_DDR	DDRD
-#define AT_PIN_PORT	PORTD
-#define AT_PIN_REG	PIND
-#define AT_PIN_INIT	(AT_PIN_DDR |= (1<<AT_PIN))		
-#define AT_ON		(AT_PIN_PORT = (1 << AT_PIN))			// debug led on
-#define AT_OFF 		(AT_PIN_PORT &= ~(1 << AT_PIN))			// debug led off
-
 
 #endif

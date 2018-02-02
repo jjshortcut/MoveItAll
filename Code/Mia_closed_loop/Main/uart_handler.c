@@ -84,16 +84,6 @@ void print_float(double c, uint8_t ln)
 		uart_puts("\n");
 	}
 }
-/*
-void print_value (char *id, int *value)
-{
-	char buffer[8];
-	//itoa(value, buffer, 10);
-	//uart_putc(id);
-	uart_putc(':');
-	uart_puts(buffer);
-	uart_puts("\n");
-}*/
 
 void print_value (char id, int value)
 {
@@ -256,6 +246,7 @@ void process_command()
 		
 		case 'S':	/* STOP */
 			device.movementEnabled = FALSE;
+			device.status=STOP;
 			uart_puts("STOP!");
 		break;
 		
@@ -276,16 +267,14 @@ void process_command()
 			}
 		}
 		break;
-		
-					
+				
 		default:
 		uart_puts("No valid command:");
 		uart_putc(command_in[0]);
 		uart_puts(" (");
 		print_int(command_in[0], 0);
 		uart_puts(")\n");
-		break;
-		
+		break;	
 	}
 	command_ready = FALSE;
 }

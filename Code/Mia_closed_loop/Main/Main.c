@@ -2,12 +2,12 @@
 *	Main.c
 *	MoveItAll project
 *	Author: Jan-Jaap Schuurman @ ProtoSpace 2018
-*	Version: 0.1
+*	Version: 1
 */
 
 /*
 TODO:
--
+- Use of break pin of motor driver
 */
 
 #include <avr/io.h>
@@ -56,30 +56,25 @@ int main(void)
 	//uart_puts("\n\rInit Uart OK\n");
 	uart_puts("ÿÿÿrestÿÿÿ");	// reset HMI
 
+	// Start values
 	device.current_limit = DEFAULT_CURRENT_LIMIT;	// set current limit
 	device.movementEnabled = FALSE;
 	device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
-
+	device.status=STOP;
+	device.setpoint_angle = 50;
+	
 	/* Now the device is ready! */
 	//uart_puts("MoveItAll hand ready!");		/* Print version number	*/
 	//print_float(VERSION,1);
-	
-	//set_motor_dir(FALSE);
-	//set_motor_speed(127);//50%
-	device.setpoint_angle = 50;
-	
+
 	while(1)
 	{	
 		get_serial();
-		//if (command_ready) {process_command();}
 		
-		if (check_movement)
+		if (check_movement)	// triggered bij 10ms int
 		{
 			if (command_ready) {process_command();}
-			//check_auto_movement();	// Check if it has to do auto movement
 			p_loop();	// 	do p loop stuff
-			
-			
 			check_movement = FALSE;
 		}
 		
@@ -90,8 +85,6 @@ int main(void)
 			print_counter = 0;
 		}
 		else {print_counter++;}
-			
-		
 	}
 }
 
@@ -102,14 +95,7 @@ void init_io(void)
 	PWM_A_PIN_DDR |= (1<<PWM_A_PIN);		// Output
 	BRAKE_A_PIN_DDR |= (1<<BRAKE_A_PIN);	// Output
 	
-	//SW_PIN_DDR &= ~(1<<SW_PIN);	// Buttons/switches as input
-	//SW_PIN_PORT |= (1<<SW_PIN);	// With pullups on
-	
-	//CHARGE_ST_DDR &= ~(1<<CHARGE_ST_PIN);	// Charge status pin as input
 	LED_PIN_DDR |= (1<<LED_PIN);	// Init test pin
-	//DDRB |= (1<<0);	// PB0 AS OUTPUT
-	//BATT_PWR_INIT;	// Leds as output
-	//BATT_PWR_OFF;	// Leds off
 }
 
 void init_int(void)
@@ -202,23 +188,32 @@ void print_values(void)
 	}
 	
 	uart_puts(" STAT=");
-	if (device.status == WORKING_UP)
-	{
-		uart_puts("WORKING UP\n");
-	}
-	else if (device.status == WORKING_DOWN)
-	{
-		uart_puts("WORKING DOWN\n");
-	}
-	else if (device.status == DONE)
-	{
-		uart_puts("DONE\n");
-	}
-	else if (device.status == STOP)
-	{
-		uart_puts("STOP\n");
-	}
 	
+	switch (device.status)
+	{
+		case WORKING_UP:
+			uart_puts("WORKING UP\n");
+		break;
+		
+		case WORKING_DOWN:
+			uart_puts("WORKING DOWN\n");
+		break;
+		
+		case DONE:
+			uart_puts("DONE\n");
+		break;
+		
+		case STOP:
+			uart_puts("STOP\n");
+		break;
+		
+		case CURR_OVF:
+			uart_puts("CURR OVF\n");
+		break;
+		
+		default:
+		break;
+	}	
 }
 
 void print_HMI(void)
@@ -231,28 +226,47 @@ void print_HMI(void)
 	print_int(device.setpoint_angle, FALSE);
 	uart_puts("ÿÿÿ");
 	
-	if (device.status==WORKING_UP)
+	switch (device.status) 
 	{
-		uart_puts("t3.txt=\"TREK..\"");
-		uart_puts("ÿÿÿ");
+		case WORKING_UP:
+			uart_puts("t3.txt=\"TREK..\"");
+			uart_puts("ÿÿÿ");			
+			uart_puts("t3.picc=0");	// Blue
+			uart_puts("ÿÿÿ");
+		break;
+		
+		case WORKING_DOWN:
+			uart_puts("t3.txt=\"ONTSPAN..\"");
+			uart_puts("ÿÿÿ");
+			uart_puts("t3.picc=0");	// Blue
+			uart_puts("ÿÿÿ");
+		break;
+		
+		case DONE:
+			uart_puts("t3.txt=\"KLAAR\"");
+			uart_puts("ÿÿÿ");
+			uart_puts("t3.picc=1");	// Green
+			uart_puts("ÿÿÿ");
+		break;
+		
+		case STOP:
+			uart_puts("t3.txt=\"STOP, RESET\"");
+			uart_puts("ÿÿÿ");	
+			uart_puts("t3.picc=2");	// Red
+			uart_puts("ÿÿÿ");
+		break;
+		
+		case CURR_OVF:
+			uart_puts("t3.txt=\"STOP, KRACHT\"");
+			uart_puts("ÿÿÿ");
+			uart_puts("t3.picc=2");	// Red
+			uart_puts("ÿÿÿ");
+		break;
+		
+		default:
+		break;
 	}
-	else if (device.status==WORKING_DOWN)
-	{
-		uart_puts("t3.txt=\"ONTSPAN..\"");
-		uart_puts("ÿÿÿ");
-	}	
-	else if (device.status==DONE)
-	{
-		uart_puts("t3.txt=\"KLAAR\"");
-		uart_puts("ÿÿÿ");
-	}
-	
-	if (device.status==STOP)
-	{
-		uart_puts("t3.txt=\"STOP, RESET\"");
-		uart_puts("ÿÿÿ");
-	}
-	
+		
 	//uart_puts("n2.val=");
 	//print_int(device.current, FALSE);
 	//uart_puts("ÿÿÿ");	
@@ -292,80 +306,18 @@ void set_motor_speed(uint8_t speed)
 	}
 }
 
-uint16_t calculate_error(void)
-{
-	return 0;
-}
-/*
-void p_loop(void)
-{
-	uint16_t speed = 0;
-	static uint16_t error_old = 0;
-	uint16_t response = 0;
-	static uint16_t timeout_counter;
-	
-	if (device.current>=device.current_limit)
-	{
-		set_motor_speed(0);	// Turn motor off
-		// TODO set brake pin
-		device.movementEnabled = FALSE;
-	}
-	
-	if (device.current_angle < device.setpoint_angle)	// setpoint is further, pull
-	{
-		device.error = (device.setpoint_angle - device.current_angle);	// Calc error
-		set_motor_dir(FORWARD);
-		speed = (P_GAIN * device.error);								// calculate output pwm value
-		speed = (speed > 255) ? 255 : speed;							// limit output
-		speed = (device.error<=MIN_ACT_ON_ERROR) ? 0 : speed;			// if error too small stop motor
-		set_motor_speed(speed);	// do output
-	}
-	else  // past the setpoint, release
-	{	
-		device.error = (device.current_angle - device.setpoint_angle); // Calc error
-		set_motor_dir(BACKWARD);
-		speed = (P_GAIN * device.error);								// calculate output pwm value
-		//speed = (speed > 255) ? 255 : speed;							// limit output
-		speed = (speed > 0) ? 255 : 0;							// limit output
-		speed = (device.error<=MIN_ACT_ON_ERROR) ? 0 : speed;			// if error too small stop motor
-		
-		
-		if (timeout_counter >= (TIMEOUT_MS/INTERRUPT_MS))	// time to check response
-		{
-			response = (device.error - error_old);
-			//uart_puts("response=");
-			//print_int(response, TRUE);
-			error_old = device.error;	// get new old error
-			
-			if(response <= 5)		//no response
-			{
-				set_motor_speed(0);	// stop motor		
-			}
-			else
-			{				
-				set_motor_speed(speed);	// keep moving	
-				uart_puts("ON\n");
-			}
-			timeout_counter=0;	// reset
-		}
-		timeout_counter++;
-	}
-}
-*/
-
 void p_loop(void)
 {
 	uint16_t speed = 0;
 	static uint16_t error_old = 0;
 	static uint16_t timer = 0;
-	//static uint8_t init_move = FALSE;
 	
 	if (device.current>=device.current_limit)
 	{
 		set_motor_speed(0);	// Turn motor off
 		// TODO set brake pin
 		device.movementEnabled = FALSE;
-		device.status = STOP;
+		device.status = CURR_OVF;
 	}
 
 	if (device.movementEnabled == TRUE)
@@ -384,59 +336,43 @@ void p_loop(void)
 		{
 			device.error = (device.current_angle - device.setpoint_angle); // Calc error
 			set_motor_dir(BACKWARD);
-			
-			/*if (!init_move)	// do release a bit first
+
+			if (timer == (FUNCTION_TIMER_MS/INTERRUPT_MS))
 			{
-				set_motor_speed(255);
-				init_move = TRUE;
-				device.status = WORKING;
-				//uart_puts("INITSPEED\n");
-			}
-			else
-			{*/
-				if (timer == (FUNCTION_TIMER_MS/INTERRUPT_MS))
+				LED_TOGGLE;	// every 200ms?
+				if (device.error < error_old)	// if moved a bit
 				{
-					LED_TOGGLE;	// every 200ms?
-					if (device.error < error_old)	// if moved a bit
-					{
-						speed = (P_GAIN * device.error);								// calculate output pwm value
-						speed = (speed > 255) ? 255 : speed;							// limit output
-						//set_motor_speed(speed);
-						set_motor_speed(255);	// do output
-						//uart_puts("ON\n");
-					}
-					else
-					{
-						set_motor_speed(0);	// wait for the user to release a bit
-						//uart_puts("OFF\n");
-					}
-					
-					error_old = device.error;
-					timer = 0;
+					speed = (P_GAIN * device.error);		// calculate output pwm value
+					speed = (speed > 255) ? 255 : speed;	// limit output
+					//set_motor_speed(speed);
+					set_motor_speed(255);
 				}
 				else
 				{
-					timer++;
+					set_motor_speed(0);	// wait for the user to release a bit
 				}
-			//}
+					
+				error_old = device.error;
+				timer = 0;
+			}
+			else
+			{
+				timer++;
+			}
 			device.status = WORKING_DOWN;
 		}
 		else
 		{
 			set_motor_speed(0);	// at position
 			device.min_act_on_error = MIN_ACT_ON_ERROR_EXTENDED;
-			//init_move = TRUE;
 			device.status = DONE;
 		}
 		check_auto_movement();	// Check if it has to do auto movement
 	}
 	else
 	{
-		set_motor_speed(0);
-		device.status = STOP;
+		set_motor_speed(0);	
 	}	
-	
-	
 }
 
 void check_auto_movement(void)
@@ -453,20 +389,15 @@ void check_auto_movement(void)
 			{
 				device.setpoint_angle = device.setpoint_angle_previous;
 				move_up = FALSE;
-				uart_puts("Set to up:");
-				print_int(device.multiply_movement, TRUE);
+				//uart_puts("Set to up:");
+				//print_int(device.multiply_movement, TRUE);
 				device.multiply_movement--;
 			}
 			else
 			{
 				device.setpoint_angle = 0;
 				move_up = TRUE;
-				uart_puts("Set to down\n");
-			}
-			
-			if (!device.multiply_movement)
-			{
-				uart_puts("XXXXXXXXXXXX DONE!\n");
+				//uart_puts("Set to down\n");
 			}
 		}	
 	}
