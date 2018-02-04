@@ -40,7 +40,9 @@
 #define INTERRUPT_MS 10	// check max also!
 #define REFRESH_LOOP_MS 500	/* delay in main loop */ 
 
-#define TIMEOUT_TIME (5000/REFRESH_LOOP_MS) // 5 SEC
+#define CURR_PEAK_OVF_TIME_MS	800	// Length of pulse before curr overflow
+
+//#define TIMEOUT_TIME (5000/REFRESH_LOOP_MS) // 5 SEC
 
 #define FALSE 0
 #define TRUE 1

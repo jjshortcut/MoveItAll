@@ -29,6 +29,7 @@ uint16_t print_counter = 0;
 
 ISR (TIMER1_COMPA_vect)  // timer1 compA
 {
+	static volatile uint16_t current_ovf_counter = 0;
 	//LED_TOGGLE;	// alive LED
 	
 	device.current = read_adc(SENSE_A_PIN);	// current measurement of motor
@@ -40,6 +41,22 @@ ISR (TIMER1_COMPA_vect)  // timer1 compA
 	else if(device.current_angle > MAX_DEGREES)
 	{
 		device.current_angle = MAX_DEGREES;
+	}
+	
+	if (device.current>device.current_limit)
+	{
+		current_ovf_counter++;		
+	}
+	else
+	{
+		current_ovf_counter=0;
+	}
+	
+	if (current_ovf_counter == (CURR_PEAK_OVF_TIME_MS/INTERRUPT_MS))
+	{
+		device.movementEnabled = FALSE;
+		device.status = CURR_OVF;
+		current_ovf_counter=0;
 	}
 	
 	check_movement = TRUE;
@@ -311,14 +328,6 @@ void p_loop(void)
 	uint16_t speed = 0;
 	static uint16_t error_old = 0;
 	static uint16_t timer = 0;
-	
-	if (device.current>=device.current_limit)
-	{
-		set_motor_speed(0);	// Turn motor off
-		// TODO set brake pin
-		device.movementEnabled = FALSE;
-		device.status = CURR_OVF;
-	}
 
 	if (device.movementEnabled == TRUE)
 	{
