@@ -56,6 +56,8 @@ ISR (TIMER1_COMPA_vect)  // timer1 compA
 	{
 		device.movementEnabled = FALSE;
 		device.status = CURR_OVF;
+		device.setpoint_angle=0;
+		device.multiply_movement=0;
 		current_ovf_counter=0;
 	}
 	
@@ -71,7 +73,7 @@ int main(void)
 	uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) );	/* Init Uart */
 	sei();						/* Enable global interrupts for uart*/
 	//uart_puts("\n\rInit Uart OK\n");
-	uart_puts("ÿÿÿrestÿÿÿ");	// reset HMI
+	//uart_puts("ÿÿÿrestÿÿÿ");	// reset HMI
 
 	// Start values
 	device.current_limit = DEFAULT_CURRENT_LIMIT;	// set current limit
@@ -328,6 +330,7 @@ void p_loop(void)
 	uint16_t speed = 0;
 	static uint16_t error_old = 0;
 	static uint16_t timer = 0;
+	static uint8_t move_kick = 0;	// to start the movement downwards
 
 	if (device.movementEnabled == TRUE)
 	{
@@ -348,19 +351,27 @@ void p_loop(void)
 
 			if (timer == (FUNCTION_TIMER_MS/INTERRUPT_MS))
 			{
-				LED_TOGGLE;	// every 200ms?
-				if (device.error < error_old)	// if moved a bit
+				if (move_kick<=1)
 				{
-					speed = (P_GAIN * device.error);		// calculate output pwm value
-					speed = (speed > 255) ? 255 : speed;	// limit output
-					//set_motor_speed(speed);
-					set_motor_speed(255);
+					set_motor_speed(255);	// start with a bit of movevent
+					move_kick++;
 				}
 				else
 				{
-					set_motor_speed(0);	// wait for the user to release a bit
+					LED_TOGGLE;	// every 200ms?
+					if (device.error < error_old)	// if moved a bit
+					{
+						speed = (P_GAIN * device.error);		// calculate output pwm value
+						speed = (speed > 255) ? 255 : speed;	// limit output
+						//set_motor_speed(speed);
+						set_motor_speed(255);
+					}
+					else
+					{
+						set_motor_speed(0);	// wait for the user to release a bit
+					}
 				}
-					
+
 				error_old = device.error;
 				timer = 0;
 			}
@@ -374,6 +385,7 @@ void p_loop(void)
 		{
 			set_motor_speed(0);	// at position
 			device.min_act_on_error = MIN_ACT_ON_ERROR_EXTENDED;
+			move_kick=0;
 			device.status = DONE;
 		}
 		check_auto_movement();	// Check if it has to do auto movement
@@ -405,6 +417,7 @@ void check_auto_movement(void)
 			else
 			{
 				device.setpoint_angle = 0;
+				//device.setpoint_angle = 15;
 				move_up = TRUE;
 				//uart_puts("Set to down\n");
 			}

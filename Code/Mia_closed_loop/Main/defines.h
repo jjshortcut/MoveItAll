@@ -22,7 +22,8 @@
 #define MAX_ANGLE 665
 #define MAX_DEGREES 105
 
-#define DEFAULT_CURRENT_LIMIT 350
+#define DEFAULT_CURRENT_LIMIT	130
+#define CURR_PEAK_OVF_TIME_MS	1000	// Length of pulse before curr overflow
 
 #define DONE 0
 #define WORKING_UP 1
@@ -40,7 +41,7 @@
 #define INTERRUPT_MS 10	// check max also!
 #define REFRESH_LOOP_MS 500	/* delay in main loop */ 
 
-#define CURR_PEAK_OVF_TIME_MS	800	// Length of pulse before curr overflow
+
 
 //#define TIMEOUT_TIME (5000/REFRESH_LOOP_MS) // 5 SEC
 
