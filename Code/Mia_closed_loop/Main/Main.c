@@ -80,7 +80,7 @@ int main(void)
 	device.movementEnabled = FALSE;
 	device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
 	device.status=STOP;
-	device.setpoint_angle = 50;
+	device.setpoint_angle = 0;
 	
 	/* Now the device is ready! */
 	//uart_puts("MoveItAll hand ready!");		/* Print version number	*/
