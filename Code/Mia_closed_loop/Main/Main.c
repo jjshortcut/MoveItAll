@@ -416,8 +416,8 @@ void check_auto_movement(void)
 			}
 			else
 			{
-				device.setpoint_angle = 0;
-				//device.setpoint_angle = 15;
+				//device.setpoint_angle = 0;
+				device.setpoint_angle = (device.setpoint_angle_previous-15);
 				move_up = TRUE;
 				//uart_puts("Set to down\n");
 			}
