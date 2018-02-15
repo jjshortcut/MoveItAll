@@ -182,6 +182,7 @@ void process_command()
 				{
 					device.setpoint_angle = val;
 					device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+					device.error_old=0;
 					uart_puts("Setpoint = ");
 					print_int(val, TRUE);
 				}
@@ -205,6 +206,7 @@ void process_command()
 						device.setpoint_angle += val;
 						device.setpoint_angle = (device.setpoint_angle >= MAX_DEGREES) ? MAX_DEGREES : device.setpoint_angle;
 						device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+						device.error_old=0;
 						uart_puts("Setpoint = ");
 						print_int(device.setpoint_angle, TRUE);
 					}
@@ -226,6 +228,7 @@ void process_command()
 					{
 						device.setpoint_angle -= val;
 						device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+						device.error_old=0;
 						uart_puts("Setpoint = ");
 						print_int(device.setpoint_angle, TRUE);
 					}
@@ -241,6 +244,7 @@ void process_command()
 			device.movementEnabled = TRUE;
 			device.multiply_movement = 0;
 			device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
+			device.error_old=0;
 			uart_puts("Reset");
 		break;
 		
@@ -266,6 +270,20 @@ void process_command()
 				uart_puts("Multiply movement not in range\n");
 			}
 		}
+		break;
+		
+		case 'U':	/* PULL */
+		set_motor_dir(PULL);
+		set_motor_speed(255);
+		_delay_ms(500);
+		set_motor_speed(0);
+		break;
+		
+		case 'D':	/* RELEASE */
+		set_motor_dir(RELEASE);
+		set_motor_speed(255);
+		_delay_ms(500);
+		set_motor_speed(0);
 		break;
 				
 		default:

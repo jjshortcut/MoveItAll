@@ -26,7 +26,6 @@
 
 #define UART_BAUD_RATE	9600//19200//115200	// Baudrate
 
-extern uint8_t debug_on;	// Debug msg's
 
 /* Uart command receive vars */
 char data_in[100];

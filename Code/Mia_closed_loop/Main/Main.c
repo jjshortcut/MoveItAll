@@ -97,13 +97,17 @@ int main(void)
 			check_movement = FALSE;
 		}
 		
-		if (print_counter == REFRESH_LOOP_MS)
+		//if (print_counter == REFRESH_LOOP_MS)
 		{
-			//print_values();
-			print_HMI();
+			#ifdef DEBUG_MSG
+				print_values();
+			#else
+				print_HMI();
+			#endif
+		
 			print_counter = 0;
 		}
-		else {print_counter++;}
+		//else {print_counter++;}
 	}
 }
 
@@ -193,11 +197,14 @@ void print_values(void)
 	uart_puts(" Err=");
 	print_int(device.error, FALSE);
 	
+	uart_puts(" old=");
+	print_int(device.error_old, FALSE);
+	
 	uart_puts(" Spd=");
 	print_int(device.speed, FALSE);
 	
 	uart_puts(" Dir=");
-	if (device.direction == FORWARD)
+	if (device.direction == PULL)
 	{
 		uart_puts("PULL");		
 	}
@@ -294,11 +301,11 @@ void print_HMI(void)
 
 void set_motor_dir(uint8_t dir)
 {
-	if (dir == FORWARD)
+	if (dir == PULL)
 	{
 		DIR_A_ON;
 	}
-	else if (dir == BACKWARD)
+	else if (dir == RELEASE)
 	{
 		DIR_A_OFF;
 	}	
@@ -312,10 +319,12 @@ void set_motor_speed(uint8_t speed)
 		if (speed==255)
 		{
 			PWM_A_ON;
+			device.speed=255;
 		}
 		else if (speed==0)
 		{
 			PWM_A_OFF;
+			device.speed=0;
 		}
 		else
 		{
@@ -328,7 +337,7 @@ void set_motor_speed(uint8_t speed)
 void p_loop(void)
 {
 	uint16_t speed = 0;
-	static uint16_t error_old = 0;
+	//static uint16_t error_old = 0;
 	static uint16_t timer = 0;
 	static uint8_t move_kick = 0;	// to start the movement downwards
 
@@ -337,7 +346,7 @@ void p_loop(void)
 		if ((device.current_angle + device.min_act_on_error) <= device.setpoint_angle)	// setpoint is further, pull
 		{
 			device.error = (device.setpoint_angle - device.current_angle);	// Calc error
-			set_motor_dir(FORWARD);
+			set_motor_dir(PULL);
 			speed = (P_GAIN * device.error);								// calculate output pwm value
 			speed = (speed > 255) ? 255 : speed;							// limit output
 			//set_motor_speed(speed);	// do output
@@ -347,19 +356,21 @@ void p_loop(void)
 		else if ((device.current_angle > device.min_act_on_error) && ((device.current_angle - device.min_act_on_error) >= device.setpoint_angle))  // past the setpoint, release
 		{
 			device.error = (device.current_angle - device.setpoint_angle); // Calc error
-			set_motor_dir(BACKWARD);
+			set_motor_dir(RELEASE);
 
 			if (timer == (FUNCTION_TIMER_MS/INTERRUPT_MS))
 			{
-				if (move_kick<=1)
-				{
-					set_motor_speed(255);	// start with a bit of movevent
-					move_kick++;
-				}
-				else
+				//if (move_kick<=1)
+				//{
+				//	set_motor_speed(255);	// start with a bit of movement
+				//	move_kick++;	
+					//error_old = device.error;	
+				//	uart_puts("kick\n");			
+				//}
+				//else
 				{
 					LED_TOGGLE;	// every 200ms?
-					if (device.error < error_old)	// if moved a bit
+					if (device.error < device.error_old)	// if moved a bit
 					{
 						speed = (P_GAIN * device.error);		// calculate output pwm value
 						speed = (speed > 255) ? 255 : speed;	// limit output
@@ -371,8 +382,13 @@ void p_loop(void)
 						set_motor_speed(0);	// wait for the user to release a bit
 					}
 				}
-
-				error_old = device.error;
+				if ((device.error < device.error_old) || (device.error_old==0))
+				{
+					device.error_old = device.error;	// only do this when the hand has moved down
+				}
+				//uart_puts("err_old=");
+				//print_int(error_old, 1);
+				
 				timer = 0;
 			}
 			else
@@ -385,7 +401,7 @@ void p_loop(void)
 		{
 			set_motor_speed(0);	// at position
 			device.min_act_on_error = MIN_ACT_ON_ERROR_EXTENDED;
-			move_kick=0;
+			//move_kick=0;
 			device.status = DONE;
 		}
 		check_auto_movement();	// Check if it has to do auto movement
@@ -419,6 +435,7 @@ void check_auto_movement(void)
 				//device.setpoint_angle = 0;
 				device.setpoint_angle = (device.setpoint_angle_previous-15);
 				move_up = TRUE;
+				device.error_old=0;
 				//uart_puts("Set to down\n");
 			}
 		}	

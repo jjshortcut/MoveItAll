@@ -13,6 +13,7 @@
 #include <util/delay.h>
 #include "Hal.h"
 #define VERSION 1
+#define DEBUG_MSG	// use debug msg instead of HMI
 
 #define ON 1
 #define OFF 0
@@ -54,6 +55,7 @@ struct database {
 	uint16_t current_angle;
 	uint8_t min_act_on_error;
 	uint16_t error;
+	uint16_t error_old;
 	uint16_t current;
 	uint16_t current_limit;
 	volatile uint8_t movementEnabled;
@@ -78,8 +80,8 @@ void print_HMI(void);		// HMI update
 
 void check_auto_movement(void);
 
-#define FORWARD 0
-#define BACKWARD 1
+#define PULL 0
+#define RELEASE 1
 
 /* LED PIN PIN5/PD5 */
 #define LED_PIN		PD5
