@@ -92,6 +92,15 @@ void check_auto_movement(void);
 #define LED_OFF 		(LED_PIN_PORT &= ~(1 << LED_PIN))		// debug led off
 #define LED_TOGGLE		(LED_PIN_PORT ^= (1 << LED_PIN))		// debug toggle
 
+/* LED PIN PIN5/PD5 */
+#define LCD_PIN		PD2
+#define LCD_PIN_DDR	DDRD
+#define LCD_PIN_PORT	PORTD
+#define LCD_PIN_REG	PIND
+#define LCD_ON			(LCD_PIN_PORT = (1 << LCD_PIN))			// debug led on
+#define LCD_OFF 		(LCD_PIN_PORT &= ~(1 << LCD_PIN))		// debug led off
+#define LCD_TOGGLE		(LCD_PIN_PORT ^= (1 << LCD_PIN))		// debug toggle
+
 // DIR D13/D12
 // PWM D3/D11
 // BRAKE D8/D9

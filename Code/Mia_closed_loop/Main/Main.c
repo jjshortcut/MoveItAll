@@ -70,6 +70,8 @@ int main(void)
 	init_int();			/* Init int for resfresh display every x ms	*/
 	init_adc();			/* Init ADC */	
 	
+	LCD_ON;
+	
 	uart_init( UART_BAUD_SELECT(UART_BAUD_RATE,F_CPU) );	/* Init Uart */
 	sei();						/* Enable global interrupts for uart*/
 	//uart_puts("\n\rInit Uart OK\n");
@@ -81,6 +83,8 @@ int main(void)
 	device.min_act_on_error=MIN_ACT_ON_ERROR_DEFAULT;
 	device.status=STOP;
 	device.setpoint_angle = 0;
+	
+	
 	
 	/* Now the device is ready! */
 	//uart_puts("MoveItAll hand ready!");		/* Print version number	*/
@@ -119,6 +123,7 @@ void init_io(void)
 	BRAKE_A_PIN_DDR |= (1<<BRAKE_A_PIN);	// Output
 	
 	LED_PIN_DDR |= (1<<LED_PIN);	// Init test pin
+	LCD_PIN_DDR |= (1<<LCD_PIN);	// Init test pin
 }
 
 void init_int(void)
@@ -369,7 +374,7 @@ void p_loop(void)
 				//}
 				//else
 				{
-					LED_TOGGLE;	// every 200ms?
+					//LED_TOGGLE;	// every 200ms?
 					if (device.error < device.error_old)	// if moved a bit
 					{
 						speed = (P_GAIN * device.error);		// calculate output pwm value
